@@ -4,11 +4,27 @@ services:
     env: docker
     dockerfilePath: ./Dockerfile
     envVars:
-      - key: JDBC_DATABASE_DRIVER
-        value: org.postgresql.Driver
-      - key: HIBERNATE_DIALECT
+      - key: SPRING_DATASOURCE_URL
+        fromDatabase:
+          name: profhub-db
+          property: connectionString
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase:
+          name: profhub-db
+          property: user
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase:
+          name: profhub-db
+          property: password
+      - key: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
         value: org.hibernate.dialect.PostgreSQLDialect
+      - key: SPRING_JPA_HIBERNATE_DDL_AUTO
+        value: update
       - key: H2_CONSOLE_ENABLED
         value: "false"
       - key: SPRING_PROFILES_ACTIVE
-        value: prod 
+        value: prod
+
+databases:
+  - name: profhub-db
+    plan: free 
