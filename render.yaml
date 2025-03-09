@@ -2,12 +2,13 @@ services:
   - type: web
     name: profhub
     env: docker
-    buildCommand: ./mvnw clean package -DskipTests
-    startCommand: java -jar target/*.jar
+    dockerfilePath: ./Dockerfile
     envVars:
       - key: JDBC_DATABASE_DRIVER
         value: org.postgresql.Driver
       - key: HIBERNATE_DIALECT
         value: org.hibernate.dialect.PostgreSQLDialect
       - key: H2_CONSOLE_ENABLED
-        value: false 
+        value: "false"
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod 
