@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:h2:file:./data/itportal;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    username: sa
-    password:
+    url: ${DATABASE_URL:jdbc:h2:mem:itportal}
+    username: ${DATABASE_USERNAME:sa}
+    password: ${DATABASE_PASSWORD:}
     driver-class-name: org.h2.Driver
   jpa:
     hibernate:
@@ -16,8 +16,6 @@ spring:
     console:
       enabled: true
       path: /h2-console
-      settings:
-        web-allow-others: true
 
   thymeleaf:
     cache: false
@@ -25,11 +23,14 @@ spring:
     suffix: .html
 
 server:
-  port: 8080
+  port: ${PORT:8080}
+  error:
+    whitelabel:
+      enabled: false
 
 logging:
   level:
-    org.springframework.security: DEBUG
+    org.springframework.security: INFO
     org.hibernate.SQL: DEBUG
     com.itportal: DEBUG
     org.hibernate.type.descriptor.sql: TRACE
