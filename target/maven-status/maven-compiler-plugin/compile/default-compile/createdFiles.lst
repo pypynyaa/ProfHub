@@ -23,6 +23,7 @@ com/itportal/repository/ProfessionRepository.class
 com/itportal/repository/ChatRepository.class
 com/itportal/repository/UserRepository.class
 com/itportal/model/Message.class
+com/itportal/controller/MessageController.class
 com/itportal/service/ProfessionService.class
 com/itportal/config/SecurityConfig.class
 com/itportal/service/CustomUserDetailsService.class
