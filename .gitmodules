@@ -1,0 +1,3 @@
+[submodule "src/main/resources/static/tests"]
+	path = src/main/resources/static/tests
+	url = https://github.com/pypynyaa/tests.git
