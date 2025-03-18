@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title>Доступные тесты</title>
+    <th:block layout:fragment="styles">
+        <style>
+            .test-section {
+                padding: 3rem 0;
+                background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                min-height: calc(100vh - 200px);
+            }
+            .test-card {
+                transition: all 0.3s ease;
+                height: 100%;
+                border: none;
+                background: white;
+                position: relative;
+                overflow: hidden;
+            }
+            .test-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            }
+            .test-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 4px;
+                background: linear-gradient(90deg, #007bff, #6610f2);
+            }
+            .test-icon {
+                font-size: 2.5rem;
+                margin-bottom: 1.5rem;
+                background: #f8f9fa;
+                width: 80px;
+                height: 80px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0 auto 1.5rem;
+            }
+            .test-duration {
+                position: absolute;
+                top: 1rem;
+                right: 1rem;
+                background-color: rgba(0, 123, 255, 0.1);
+                color: #007bff;
+                padding: 0.5rem 1rem;
+                border-radius: 20px;
+                font-weight: 500;
+            }
+            .card-title {
+                font-size: 1.25rem;
+                font-weight: 600;
+                margin-bottom: 1rem;
+                color: #2c3e50;
+            }
+            .card-text {
+                color: #6c757d;
+                font-size: 0.95rem;
+                margin-bottom: 1.5rem;
+            }
+            .btn-primary {
+                padding: 0.75rem 1.5rem;
+                border-radius: 25px;
+                font-weight: 500;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                background: linear-gradient(90deg, #007bff, #6610f2);
+                border: none;
+                transition: all 0.3s ease;
+            }
+            .btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(0,123,255,0.3);
+            }
+            .btn-outline-secondary {
+                border-radius: 25px;
+                padding: 0.75rem 1rem;
+            }
+            .page-header {
+                text-align: center;
+                margin-bottom: 3rem;
+            }
+            .page-header h2 {
+                font-weight: 700;
+                color: #2c3e50;
+                margin-bottom: 1rem;
+            }
+            .page-header p {
+                color: #6c757d;
+                font-size: 1.1rem;
+                max-width: 600px;
+                margin: 0 auto;
+            }
+            .test-features {
+                position: absolute;
+                bottom: 1rem;
+                right: 1rem;
+                display: flex;
+                gap: 0.5rem;
+            }
+            .feature-icon {
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+                background: #f8f9fa;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #6c757d;
+            }
+            .card-body {
+                padding: 2rem;
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+    <div layout:fragment="content">
+        <section class="test-section">
+            <div class="container">
+                <div class="page-header">
+                    <h2 class="display-4">Доступные тесты</h2>
+                    <p class="lead">Выберите тест для оценки ваших профессиональных качеств и определения наиболее подходящей карьерной траектории</p>
+                </div>
+                
+                <div class="row g-4">
+                    <div class="col-md-4" th:each="test : ${tests}">
+                        <div class="card test-card shadow-sm">
+                            <div class="card-body">
+                                <div class="test-duration">
+                                    <i class="bi bi-clock me-1"></i>
+                                    <span th:text="${test.duration + ' сек.'}">300 сек.</span>
+                                </div>
+                                
+                                <div class="test-icon">
+                                    <i th:class="${'bi ' + 
+                                        (test.type == 'SIMPLE_REACTION' ? 'bi-lightning-charge text-warning' : 
+                                        (test.type == 'CHOICE_REACTION' ? 'bi-grid-3x3 text-primary' : 
+                                        'bi-shield-check text-success'))}"></i>
+                                </div>
+                                
+                                <h5 class="card-title text-center" th:text="${test.name}">Название теста</h5>
+                                <p class="card-text text-center" th:text="${test.description}">Описание теста</p>
+                                
+                                <div class="d-flex justify-content-center mt-4">
+                                    <a th:href="@{'/tests/' + ${test.id} + '/start'}" 
+                                       class="btn btn-primary">
+                                        <i class="bi bi-play-circle me-2"></i>Начать тест
+                                    </a>
+                                </div>
+                                
+                                <div class="test-features">
+                                    <div class="feature-icon" th:if="${test.showProgress}" 
+                                         data-bs-toggle="tooltip" title="Отображение прогресса">
+                                        <i class="bi bi-bar-chart"></i>
+                                    </div>
+                                    <div class="feature-icon" th:if="${test.showTime}"
+                                         data-bs-toggle="tooltip" title="Отображение времени">
+                                        <i class="bi bi-stopwatch"></i>
+                                    </div>
+                                    <div class="feature-icon" th:if="${test.showPerMinuteResults}"
+                                         data-bs-toggle="tooltip" title="Поминутная статистика">
+                                        <i class="bi bi-graph-up"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    
+    <th:block layout:fragment="scripts">
+        <script>
+            // Инициализация тултипов Bootstrap
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        </script>
+    </th:block>
+</body>
+</html> 

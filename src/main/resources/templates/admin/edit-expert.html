@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Редактирование эксперта</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .edit-expert-form {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+    
+    <div class="container mt-4">
+        <h2>Редактирование эксперта</h2>
+        
+        <div class="edit-expert-form">
+            <form th:action="@{/admin/experts/edit/{id}(id=${expert.id})}" method="post" th:object="${expert}">
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="firstName">Имя</label>
+                        <input type="text" class="form-control" id="firstName" th:field="*{firstName}" required>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="lastName">Фамилия</label>
+                        <input type="text" class="form-control" id="lastName" th:field="*{lastName}" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="email">Email</label>
+                        <input type="email" class="form-control" id="email" th:field="*{email}" required>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="specialization">Специализация</label>
+                        <input type="text" class="form-control" id="specialization" th:field="*{specialization}" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="yearsOfExperience">Опыт работы (лет)</label>
+                        <input type="number" class="form-control" id="yearsOfExperience" th:field="*{yearsOfExperience}" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+                <a th:href="@{/admin/experts}" class="btn btn-secondary">Отмена</a>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html> 

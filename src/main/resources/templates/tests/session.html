@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title th:text="${test.name}">Название теста</title>
+    <th:block layout:fragment="styles">
+        <style>
+            .test-area {
+                max-width: 800px;
+                margin: 0 auto;
+                padding: 2rem;
+                background-color: #fff;
+                border-radius: 10px;
+                box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            }
+            .test-header {
+                text-align: center;
+                margin-bottom: 2rem;
+            }
+            .stimulus-area {
+                width: 100%;
+                height: 400px;
+                background-color: #f8f9fa;
+                border-radius: 8px;
+                margin: 2rem 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 24px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+            }
+            .stimulus-area.active {
+                background-color: #ff0000;
+            }
+            .progress-container {
+                margin: 2rem 0;
+            }
+            .progress {
+                height: 20px;
+                background-color: #e9ecef;
+                border-radius: 10px;
+                overflow: hidden;
+            }
+            .progress-bar {
+                height: 100%;
+                background-color: #007bff;
+                transition: width 0.5s ease-in-out;
+            }
+            .stats {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 1rem;
+                margin: 2rem 0;
+            }
+            .stat-item {
+                background-color: #e9ecef;
+                padding: 1rem;
+                border-radius: 8px;
+                text-align: center;
+            }
+            .stat-item i {
+                font-size: 1.5rem;
+                margin-bottom: 0.5rem;
+                display: block;
+            }
+            .stat-value {
+                font-size: 1.25rem;
+                font-weight: bold;
+                margin: 0;
+            }
+            .stat-label {
+                color: #6c757d;
+                margin: 0;
+            }
+            #startButton {
+                padding: 1rem 2rem;
+                font-size: 1.25rem;
+            }
+            .test-type-icon {
+                font-size: 2rem;
+                margin-bottom: 1rem;
+            }
+            @keyframes stimulus-appear {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+            .stimulus-area.active {
+                animation: stimulus-appear 0.2s ease-out;
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="container mt-4">
+            <div class="test-area">
+                <div class="test-header">
+                    <i th:class="${'bi test-type-icon ' + 
+                        (test.type == 'SIMPLE_REACTION' ? 'bi-lightning-charge text-warning' : 
+                        (test.type == 'CHOICE_REACTION' ? 'bi-grid-3x3 text-primary' : 
+                        'bi-shield-check text-success'))}"></i>
+                    <h3 class="mb-0" th:text="${test.name}">Название теста</h3>
+                </div>
+                
+                <div class="progress-container" th:if="${test.showProgress}">
+                    <div class="progress">
+                        <div class="progress-bar" id="progressBar" role="progressbar"></div>
+                    </div>
+                </div>
+                
+                <div class="stats">
+                    <div class="stat-item" th:if="${test.showTime}">
+                        <i class="bi bi-stopwatch"></i>
+                        <p class="stat-value" id="timer">0:00</p>
+                        <p class="stat-label">Время</p>
+                    </div>
+                    <div class="stat-item">
+                        <i class="bi bi-hand-index"></i>
+                        <p class="stat-value" id="attempts">0</p>
+                        <p class="stat-label">Попыток</p>
+                    </div>
+                    <div class="stat-item">
+                        <i class="bi bi-check-circle"></i>
+                        <p class="stat-value" id="correct">0</p>
+                        <p class="stat-label">Правильных</p>
+                    </div>
+                    <div class="stat-item">
+                        <i class="bi bi-x-circle"></i>
+                        <p class="stat-value" id="errors">0</p>
+                        <p class="stat-label">Ошибок</p>
+                    </div>
+                </div>
+                
+                <div class="stimulus-area" id="stimulusArea">
+                    Нажмите кнопку для начала теста
+                </div>
+                
+                <div class="text-center">
+                    <button id="startButton" class="btn btn-primary">
+                        <i class="bi bi-play-circle me-2"></i>Начать
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <th:block layout:fragment="scripts">
+        <script th:inline="javascript">
+            const test = /*[[${test}]]*/ {};
+            const testDuration = test.duration;
+            const showProgress = test.showProgress;
+            const showTime = test.showTime;
+            const testType = test.type;
+            const accelerationInterval = test.accelerationInterval;
+            const accelerationFactor = test.accelerationFactor;
+            
+            let timer;
+            let elapsedTime = 0;
+            let attempts = 0;
+            let correctAttempts = 0;
+            let errors = 0;
+            let isRunning = false;
+            let reactionTimes = [];
+            let lastStimulusTime;
+            let currentInterval = 2000; // Начальный интервал между стимулами (2 секунды)
+            
+            function updateStats() {
+                document.getElementById('attempts').textContent = attempts;
+                document.getElementById('correct').textContent = correctAttempts;
+                document.getElementById('errors').textContent = errors;
+            }
+            
+            function updateTimer() {
+                if (showTime) {
+                    const minutes = Math.floor(elapsedTime / 60);
+                    const seconds = elapsedTime % 60;
+                    document.getElementById('timer').textContent = 
+                        minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+                }
+                
+                if (showProgress) {
+                    const progress = (elapsedTime / testDuration) * 100;
+                    document.getElementById('progressBar').style.width = progress + '%';
+                }
+            }
+            
+            function calculateAverageReactionTime() {
+                if (reactionTimes.length === 0) return 0;
+                const sum = reactionTimes.reduce((a, b) => a + b, 0);
+                return sum / reactionTimes.length;
+            }
+            
+            function endTest() {
+                isRunning = false;
+                clearInterval(timer);
+                
+                const stimulusArea = document.getElementById('stimulusArea');
+                stimulusArea.textContent = 'Тест завершен';
+                stimulusArea.style.backgroundColor = '#f8f9fa';
+                stimulusArea.classList.remove('active');
+                
+                // Отправляем результаты
+                fetch('/api/test-results', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        testId: test.id,
+                        totalAttempts: attempts,
+                        correctAttempts: correctAttempts,
+                        errors: errors,
+                        averageReactionTime: calculateAverageReactionTime()
+                    })
+                }).then(() => {
+                    window.location.href = '/tests/' + test.id + '/results';
+                });
+            }
+            
+            document.getElementById('startButton').addEventListener('click', function() {
+                if (!isRunning) {
+                    isRunning = true;
+                    this.style.display = 'none';
+                    
+                    const stimulusArea = document.getElementById('stimulusArea');
+                    stimulusArea.textContent = 'Приготовьтесь...';
+                    
+                    timer = setInterval(() => {
+                        elapsedTime++;
+                        updateTimer();
+                        
+                        // Проверяем, нужно ли увеличить скорость
+                        if (accelerationInterval > 0 && elapsedTime % accelerationInterval === 0) {
+                            currentInterval = currentInterval / accelerationFactor;
+                        }
+                        
+                        if (elapsedTime >= testDuration) {
+                            endTest();
+                        }
+                    }, 1000);
+                    
+                    // Начинаем показывать стимулы через 3 секунды
+                    setTimeout(showStimulus, 3000);
+                }
+            });
+            
+            function showStimulus() {
+                if (!isRunning) return;
+                
+                const stimulusArea = document.getElementById('stimulusArea');
+                
+                if (testType === 'SIMPLE_REACTION') {
+                    // Показываем простой стимул
+                    stimulusArea.textContent = '';
+                    stimulusArea.classList.add('active');
+                    lastStimulusTime = Date.now();
+                    
+                    setTimeout(() => {
+                        if (isRunning) {
+                            stimulusArea.classList.remove('active');
+                            stimulusArea.textContent = 'Ждите...';
+                            
+                            // Планируем следующий стимул
+                            setTimeout(showStimulus, Math.random() * currentInterval + currentInterval);
+                        }
+                    }, 500);
+                }
+                // TODO: Добавить логику для других типов тестов
+            }
+            
+            // Обработка клика по стимулу
+            document.getElementById('stimulusArea').addEventListener('click', function() {
+                if (!isRunning) return;
+                
+                if (testType === 'SIMPLE_REACTION') {
+                    attempts++;
+                    
+                    if (this.classList.contains('active')) {
+                        correctAttempts++;
+                        const reactionTime = Date.now() - lastStimulusTime;
+                        reactionTimes.push(reactionTime);
+                    } else {
+                        errors++;
+                    }
+                    
+                    updateStats();
+                }
+            });
+        </script>
+    </th:block>
+</body>
+</html> 

@@ -3,6 +3,8 @@ package com.itportal.config;
 import com.itportal.model.User;
 import com.itportal.model.UserRole;
 import com.itportal.service.UserService;
+import com.itportal.model.Expert;
+import com.itportal.service.ExpertService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -11,10 +13,12 @@ import org.springframework.stereotype.Component;
 public class DataInitializer implements CommandLineRunner {
 
     private final UserService userService;
+    private final ExpertService expertService;
 
     @Autowired
-    public DataInitializer(UserService userService) {
+    public DataInitializer(UserService userService, ExpertService expertService) {
         this.userService = userService;
+        this.expertService = expertService;
     }
 
     @Override
@@ -39,6 +43,19 @@ public class DataInitializer implements CommandLineRunner {
             consultant.setLastName("Консультантов");
             userService.registerConsultant(consultant);
             System.out.println("Консультант успешно создан");
+        }
+
+        // Создаем тестового эксперта, если его нет в базе
+        if (!userService.existsByUsername("expert")) {
+            Expert expert = new Expert();
+            expert.setFirstName("Петр");
+            expert.setLastName("Экспертов");
+            expert.setEmail("expert@profhub.ru");
+            expert.setSpecialization("Java разработка");
+            expert.setYearsOfExperience(10);
+            
+            expertService.createExpert(expert, "expert", "expert123");
+            System.out.println("Эксперт успешно создан");
         }
     }
 } 

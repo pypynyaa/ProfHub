@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <title th:text="${test.name}">Название теста</title>
+    <th:block layout:fragment="styles">
+        <style>
+            .test-container {
+                max-width: 800px;
+                margin: 0 auto;
+                padding: 2rem;
+                background-color: #fff;
+                border-radius: 10px;
+                box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            }
+            .test-header {
+                text-align: center;
+                margin-bottom: 2rem;
+            }
+            .test-description {
+                background-color: #f8f9fa;
+                padding: 1.5rem;
+                border-radius: 8px;
+                margin-bottom: 2rem;
+            }
+            .test-info {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 1rem;
+                margin-bottom: 2rem;
+            }
+            .test-info-item {
+                background-color: #e9ecef;
+                padding: 1rem;
+                border-radius: 8px;
+                text-align: center;
+            }
+            .test-info-item i {
+                font-size: 1.5rem;
+                margin-bottom: 0.5rem;
+                display: block;
+            }
+            .test-instructions {
+                background-color: #cff4fc;
+                border: 1px solid #9eeaf9;
+                border-radius: 8px;
+                padding: 1.5rem;
+                margin-bottom: 2rem;
+            }
+            .test-instructions h5 {
+                color: #055160;
+                margin-bottom: 1rem;
+            }
+            .test-instructions ul {
+                color: #055160;
+                margin-bottom: 0;
+            }
+            .start-button {
+                text-align: center;
+            }
+            .start-button .btn {
+                padding: 1rem 2rem;
+                font-size: 1.25rem;
+            }
+            .test-type-icon {
+                font-size: 3rem;
+                margin-bottom: 1rem;
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="container mt-4">
+            <div class="test-container">
+                <div class="test-header">
+                    <i th:class="${'bi test-type-icon ' + 
+                        (test.type == 'SIMPLE_REACTION' ? 'bi-lightning-charge text-warning' : 
+                        (test.type == 'CHOICE_REACTION' ? 'bi-grid-3x3 text-primary' : 
+                        'bi-shield-check text-success'))}"></i>
+                    <h2 class="mb-3" th:text="${test.name}">Название теста</h2>
+                </div>
+                
+                <div class="test-description">
+                    <h4 class="mb-3">Описание теста</h4>
+                    <p class="mb-0" th:text="${test.description}">Описание теста</p>
+                </div>
+                
+                <div class="test-info">
+                    <div class="test-info-item">
+                        <i class="bi bi-clock"></i>
+                        <strong>Длительность</strong>
+                        <p class="mb-0" th:text="${test.duration + ' сек.'}">300 сек.</p>
+                    </div>
+                    <div class="test-info-item" th:if="${test.showProgress}">
+                        <i class="bi bi-bar-chart"></i>
+                        <strong>Прогресс</strong>
+                        <p class="mb-0">Отображается</p>
+                    </div>
+                    <div class="test-info-item" th:if="${test.showTime}">
+                        <i class="bi bi-stopwatch"></i>
+                        <strong>Таймер</strong>
+                        <p class="mb-0">Отображается</p>
+                    </div>
+                    <div class="test-info-item" th:if="${test.showPerMinuteResults}">
+                        <i class="bi bi-graph-up"></i>
+                        <strong>Результаты</strong>
+                        <p class="mb-0">Поминутно</p>
+                    </div>
+                </div>
+                
+                <div class="test-instructions">
+                    <h5><i class="bi bi-info-circle me-2"></i>Инструкция</h5>
+                    <ul>
+                        <li th:if="${test.type == 'SIMPLE_REACTION'}">
+                            Нажимайте на кнопку каждый раз, когда видите стимул на экране
+                        </li>
+                        <li th:if="${test.type == 'CHOICE_REACTION'}">
+                            Выбирайте правильный стимул из нескольких вариантов
+                        </li>
+                        <li th:if="${test.type == 'INTERFERENCE_RESISTANCE'}">
+                            Сохраняйте концентрацию несмотря на отвлекающие факторы
+                        </li>
+                        <li>Тест длится <span th:text="${test.duration}">300</span> секунд</li>
+                        <li th:if="${test.showPerMinuteResults}">Каждую минуту вы будете видеть свои результаты</li>
+                        <li th:if="${test.accelerationInterval > 0}">
+                            Каждые <span th:text="${test.accelerationInterval}">60</span> секунд скорость будет увеличиваться в 
+                            <span th:text="${test.accelerationFactor}">1.2</span> раза
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="start-button">
+                    <form th:action="@{'/api/tests/' + ${test.id} + '/session'}" method="post">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-play-circle me-2"></i>Начать тест
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

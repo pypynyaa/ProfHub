@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/main}">
+<head>
+    <meta charset="UTF-8">
+    <title>Результаты тестов</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <th:block layout:fragment="styles">
+        <style>
+            .results-container {
+                max-width: 800px;
+                margin: 0 auto;
+                padding: 2rem;
+                background-color: #fff;
+                border-radius: 10px;
+                box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            }
+            .results-header {
+                text-align: center;
+                margin-bottom: 2rem;
+            }
+            .test-type-icon {
+                font-size: 3rem;
+                margin-bottom: 1rem;
+            }
+            .results-summary {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 1rem;
+                margin: 2rem 0;
+            }
+            .summary-item {
+                background-color: #e9ecef;
+                padding: 1.5rem;
+                border-radius: 8px;
+                text-align: center;
+            }
+            .summary-item i {
+                font-size: 2rem;
+                margin-bottom: 0.5rem;
+                display: block;
+            }
+            .summary-value {
+                font-size: 1.5rem;
+                font-weight: bold;
+                margin: 0;
+            }
+            .summary-label {
+                color: #6c757d;
+                margin: 0;
+            }
+            .accuracy-chart {
+                height: 200px;
+                margin: 2rem 0;
+            }
+            .reaction-times {
+                margin: 2rem 0;
+            }
+            .action-buttons {
+                text-align: center;
+                margin-top: 2rem;
+            }
+            .action-buttons .btn {
+                margin: 0 0.5rem;
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="container">
+            <h1>Ваши результаты тестов</h1>
+            <div class="results-list">
+                <div th:each="result : ${results}" class="result-card">
+        <div class="container mt-4">
+            <div class="results-container">
+                <div class="results-header">
+                    <i th:class="${'bi test-type-icon ' + 
+                        (test.type == 'SIMPLE_REACTION' ? 'bi-lightning-charge text-warning' : 
+                        (test.type == 'CHOICE_REACTION' ? 'bi-grid-3x3 text-primary' : 
+                        'bi-shield-check text-success'))}"></i>
+                    <h2 class="mb-3">Результаты теста</h2>
+                    <h4 class="text-muted" th:text="${test.name}">Название теста</h4>
+                </div>
+                
+                <div class="results-summary">
+                    <div class="summary-item">
+                        <i class="bi bi-stopwatch text-primary"></i>
+                        <p class="summary-value" th:text="${#numbers.formatDecimal(results[0].averageReactionTime, 1, 2) + ' мс'}">200 мс</p>
+                        <p class="summary-label">Среднее время реакции</p>
+                    </div>
+                    <div class="summary-item">
+                        <i class="bi bi-check-circle text-success"></i>
+                        <p class="summary-value" th:text="${#numbers.formatDecimal(results[0].accuracy, 1, 1) + '%'}">95%</p>
+                        <p class="summary-label">Точность</p>
+                    </div>
+                    <div class="summary-item">
+                        <i class="bi bi-hand-index text-info"></i>
+                        <p class="summary-value" th:text="${results[0].totalAttempts}">100</p>
+                        <p class="summary-label">Всего попыток</p>
+                    </div>
+                    <div class="summary-item">
+                        <i class="bi bi-x-circle text-danger"></i>
+                        <p class="summary-value" th:text="${results[0].errors}">5</p>
+                        <p class="summary-label">Ошибок</p>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info">
+                    <h5><i class="bi bi-info-circle me-2"></i>Интерпретация результатов</h5>
+                    <p th:if="${results[0].averageReactionTime < 200}">
+                        У вас отличное время реакции! Это важное качество для работы оператором дронов и диспетчером.
+                    </p>
+                    <p th:if="${results[0].averageReactionTime >= 200 && results[0].averageReactionTime < 300}">
+                        У вас хорошее время реакции. Это подходит для большинства профессий, требующих быстрой реакции.
+                    </p>
+                    <p th:if="${results[0].averageReactionTime >= 300}">
+                        Ваше время реакции можно улучшить с помощью тренировок.
+                    </p>
+                    <p th:if="${results[0].accuracy >= 90}">
+                        Отличная точность! Вы хорошо справляетесь с задачами, требующими внимательности.
+                    </p>
+                    <p th:if="${results[0].accuracy < 90 && results[0].accuracy >= 70}">
+                        Хорошая точность. Продолжайте тренироваться для улучшения результатов.
+                    </p>
+                    <p th:if="${results[0].accuracy < 70}">
+                        Попробуйте сосредоточиться на точности выполнения, даже если это немного замедлит реакцию.
+                    </p>
+                </div>
+                
+                <div class="action-buttons">
+                    <a th:href="@{'/tests/' + ${test.id} + '/start'}" class="btn btn-primary">
+                        <i class="bi bi-arrow-repeat me-2"></i>Пройти тест снова
+                    </a>
+                    <a th:href="@{/tests}" class="btn btn-outline-secondary">
+                        <i class="bi bi-list me-2"></i>К списку тестов
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

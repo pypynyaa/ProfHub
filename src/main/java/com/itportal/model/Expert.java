@@ -4,32 +4,30 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "users")
-public class User {
+@Table(name = "experts")
+public class Expert {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
-    private String username;
+    @Column(name = "first_name", nullable = false)
+    private String firstName;
 
-    @Column(nullable = false)
-    private String password;
+    @Column(name = "last_name", nullable = false)
+    private String lastName;
 
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(name = "first_name")
-    private String firstName;
+    @Column(name = "specialization", nullable = false)
+    private String specialization;
 
-    @Column(name = "last_name")
-    private String lastName;
+    @Column(name = "years_of_experience", nullable = false)
+    private Integer yearsOfExperience;
 
-    @Column(nullable = false)
-    private String role;
-
-    @Column(nullable = false)
-    private boolean active = true;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -57,30 +55,6 @@ public class User {
         this.id = id;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
     public String getFirstName() {
         return firstName;
     }
@@ -97,20 +71,36 @@ public class User {
         this.lastName = lastName;
     }
 
-    public String getRole() {
-        return role;
+    public String getEmail() {
+        return email;
     }
 
-    public void setRole(String role) {
-        this.role = role;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    public boolean isActive() {
-        return active;
+    public String getSpecialization() {
+        return specialization;
     }
 
-    public void setActive(boolean active) {
-        this.active = active;
+    public void setSpecialization(String specialization) {
+        this.specialization = specialization;
+    }
+
+    public Integer getYearsOfExperience() {
+        return yearsOfExperience;
+    }
+
+    public void setYearsOfExperience(Integer yearsOfExperience) {
+        this.yearsOfExperience = yearsOfExperience;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public LocalDateTime getCreatedAt() {

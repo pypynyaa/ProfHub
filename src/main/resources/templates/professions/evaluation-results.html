@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Результаты оценки профессий</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .profession-section {
+            margin-bottom: 40px;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .quality-rating {
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        .progress {
+            height: 25px;
+        }
+        .expert-details {
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+        .average-score {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #28a745;
+        }
+        .chart-container {
+            margin-top: 20px;
+            height: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+    
+    <div class="container mt-4">
+        <h2>Результаты оценки профессий</h2>
+        
+        <div class="profession-section" th:each="profession : ${professions}">
+            <h3 th:text="${profession.name}"></h3>
+            <p class="text-muted" th:text="${profession.description}"></p>
+            
+            <div class="experts-summary mb-4">
+                <h5>Эксперты, принявшие участие в оценке:</h5>
+                <div class="expert-details" th:each="expert : ${expertsByProfession[profession.id]}">
+                    <span th:text="${expert.firstName + ' ' + expert.lastName}"></span>
+                    (<span th:text="${expert.specialization}"></span>,
+                    опыт: <span th:text="${expert.yearsOfExperience}"></span> лет)
+                </div>
+            </div>
+
+            <h5>Рейтинг профессионально важных качеств:</h5>
+            <div class="quality-rating" th:each="quality : ${qualitiesByProfession[profession.id]}">
+                <div class="row align-items-center">
+                    <div class="col-md-4">
+                        <strong th:text="${quality.name}"></strong>
+                        <div class="expert-details" th:text="${quality.description}"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="progress">
+                            <div class="progress-bar" role="progressbar"
+                                 th:style="'width: ' + ${averageScores[profession.id + '-' + quality.id] * 10} + '%'"
+                                 th:text="${averageScores[profession.id + '-' + quality.id]}">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <span class="average-score" 
+                              th:text="${averageScores[profession.id + '-' + quality.id]}">
+                        </span>
+                        <span class="text-muted">/10</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <canvas th:id="'chart-' + ${profession.id}"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        document.addEventListener('DOMContentLoaded', function() {
+            const professions = /*[[${professions}]]*/ [];
+            
+            professions.forEach(profession => {
+                const qualities = /*[[${qualitiesByProfession[profession.id]}]]*/ [];
+                const scores = /*[[${averageScores}]]*/ {};
+                
+                const ctx = document.getElementById('chart-' + profession.id).getContext('2d');
+                new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: qualities.map(q => q.name),
+                        datasets: [{
+                            label: 'Средняя оценка',
+                            data: qualities.map(q => scores[profession.id + '-' + q.id]),
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                max: 10
+                            }
+                        }
+                    }
+                });
+            });
+        });
+        /*]]>*/
+    </script>
+</body>
+</html> 
