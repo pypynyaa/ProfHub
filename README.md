@@ -56,3 +56,4 @@ cd ProfHub_opd
 ├── templates/        # Шаблоны страниц
 └── public/           # Публичная директория
 ``` # ProfHub
+# ProfHub

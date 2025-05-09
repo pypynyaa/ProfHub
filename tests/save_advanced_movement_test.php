@@ -1,0 +1,52 @@
+<?php
+session_start();
+
+// Подключение к базе данных
+require_once "../db_connect.php";
+
+// Проверяем, была ли отправлена форма для сохранения результатов теста
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['res'])) {
+    // Получаем среднее время реакций из POST-данных
+    $res = $_POST['res'];
+
+    // Проверяем, авторизован ли пользователь
+    if (isset($_SESSION['user_id'])) {
+        // Получаем user_id из сессии
+        $user_id = $_SESSION['user_id'];
+
+        // Устанавливаем test_type и test_name
+        $test_type = "Оценка сложной реакции человека на движущиеся объекты";
+        $test_name = "реакция на множество движущихся объектов";
+
+        // Получаем test_id по test_type и test_name из таблицы tests
+        $stmt_test_id = $conn->prepare("SELECT id FROM tests WHERE test_type = ? AND test_name = ?");
+        $stmt_test_id->bind_param("ss", $test_type, $test_name);
+        $stmt_test_id->execute();
+        $result_test_id = $stmt_test_id->get_result();
+
+        if ($result_test_id->num_rows == 1) {
+            $row_test_id = $result_test_id->fetch_assoc();
+            $test_id = $row_test_id['id'];
+
+            // Подготовка и выполнение запроса на вставку результатов теста в базу данных
+            $stmt = $conn->prepare("INSERT INTO test_results (user_id, test_id, test_name, result) VALUES (?, ?, ?, ?)");
+            $stmt->bind_param("iisd", $user_id, $test_id, $test_name, $res);
+            if ($stmt->execute()) {
+                echo "Результаты успешно сохранены";
+            } else {
+                echo "Ошибка при сохранении результатов: " . $conn->error;
+            }
+            $stmt->close();
+        } else {
+            echo "Ошибка при получении идентификатора теста";
+        }
+        $stmt_test_id->close();
+    } else {
+        // Пользователь не авторизован, сохраняем данные в сессию
+        $_SESSION['guest_avg_reaction_time_advmove'] = $res;
+        echo "Результаты успешно сохранены в сессии";
+    }
+} else {
+    echo "Нет данных о реакционном времени";
+}
+?>
