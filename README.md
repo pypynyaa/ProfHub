@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # ProfHub - Платформа для онлайн-консультаций
 
 ## Описание
@@ -36,4 +35,5 @@ php -S localhost:8080
   - Пароль: expert123
 
 
+# ProfHub
 # ProfHub
