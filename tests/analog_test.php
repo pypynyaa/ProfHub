@@ -30,14 +30,17 @@ if (!isset($_SESSION['user_id'])) {
             color: #6cf;
         }
         .container {
-            background: rgba(0,0,0,0.85);
-            border-radius: 16px;
-            max-width: 500px;
-            margin: 60px auto 0 auto;
-            padding: 32px 24px;
-            box-shadow: 0 4px 32px rgba(0,0,0,0.4);
-            text-align: center;
-        }
+    background: rgba(0,0,0,0.85);
+    border-radius: 16px;
+    max-width: 500px;
+    margin: 60px auto 0 auto;
+    padding: 32px 24px;
+    box-shadow: 0 4px 32px rgba(0,0,0,0.4);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
         #container {
             display: none;
             width: 400px;
@@ -46,6 +49,9 @@ if (!isset($_SESSION['user_id'])) {
             position: relative;
             overflow: hidden;
             margin: 0 auto;
+            text-align: center;
+            justify-content: center;
+            align-items: center;
         }
         #circle {
             width: 40px;
@@ -67,16 +73,17 @@ if (!isset($_SESSION['user_id'])) {
             margin: 10px auto;
         }
         button {
-            background: #2d72ff;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            padding: 10px 24px;
-            font-size: 1em;
-            margin: 8px 0;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
+    background: #2d72ff;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 24px;
+    font-size: 1em;
+    margin: 8px 0;
+    cursor: pointer;
+    transition: background 0.2s;
+    width: auto; /* или можно задать фиксированную ширину */
+}
         button:hover:not(:disabled) {
             background: #1a4fb7;
         }
@@ -84,16 +91,11 @@ if (!isset($_SESSION['user_id'])) {
 </head>
 <body>
 <div class="background"></div>
-<header>
-    <p><a href="../index.php">Домой</a></p>
-    <?php if (isset($_SESSION['username'])): ?>
-        <p><a href="../account.php">Личный кабинет</a></p>
-    <?php endif; ?>
-</header>
 <div class="container">
 <div>
     <label for="duration">Выберите время выполнения (в секундах):</label>
     <input type="number" id="duration" min="10" max="2700" value="120">
+    <p>Нажмите W после того, как кружок изменит направление движения</p>
 </div>
 <button id="startButton">Начать тест</button>
 <button id="cancelButton" style="display:none;">Отмена теста</button>

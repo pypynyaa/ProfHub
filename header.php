@@ -53,6 +53,15 @@ if (isset($_SESSION['user_id'])) {
                 <li class="nav-item">
                     <a class="nav-link<?php if(basename($_SERVER['PHP_SELF'])=='admin_professions.php') echo ' active'; ?>" href="/admin_professions.php">Профессии (админ)</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link<?php if(basename($_SERVER['PHP_SELF'])=='admin_pvk_weights.php') echo ' active'; ?>" href="/admin_pvk_weights.php">Веса ПВК</a>
+                </li>
+                <?php endif; ?>
+                
+                <?php if (isset($_SESSION['user_id'])): ?>
+                <li class="nav-item">
+                    <a class="nav-link<?php if(basename($_SERVER['PHP_SELF'])=='suitability.php') echo ' active'; ?>" href="/suitability.php">Анализ пригодности</a>
+                </li>
                 <?php endif; ?>
                 
                 <li class="nav-item">

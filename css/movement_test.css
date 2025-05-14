@@ -365,8 +365,8 @@ input[type="number"] {
 	background-color: #ccac2e;
 	border-radius: 4px;
 	z-index: 999;
-	position: absolute;
-	top: -1.5em;
+	position: relative;
+	top: 0.7em;
 	left: 50%;
 	transform: translateX(-50%);
 }

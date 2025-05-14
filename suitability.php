@@ -13,108 +13,73 @@ function get_pvk_name($conn, $pvk_id) {
 }
 
 function calculate_suitability($conn, $user_id, $profession_id) {
-    // Получаем критерии для профессии
-    $criteria_sql = "SELECT * FROM evaluation_criteria WHERE profession_id = $profession_id";
+    $criteria_sql = "SELECT criteria_name, weight FROM evaluation_criteria WHERE profession_id = $profession_id";
     $criteria_result = $conn->query($criteria_sql);
     $criteria = [];
     while ($row = $criteria_result->fetch_assoc()) {
         $criteria[] = $row;
     }
-
     if (empty($criteria)) {
         return ["pvk_data" => [], "overall_score" => 0];
     }
-
-    // Проверяем, есть ли у пользователя результаты тестов
     $check_results_sql = "SELECT COUNT(*) as count FROM test_results WHERE user_id = $user_id";
     $check_results = $conn->query($check_results_sql);
     $has_results = $check_results->fetch_assoc()['count'] > 0;
-
     if (!$has_results) {
         return ["pvk_data" => [], "overall_score" => 0];
     }
-
     $total_score = 0;
     $total_weight = 0;
     $pvk_data = [];
-
     foreach ($criteria as $crit) {
-        $crit_id = $crit['id'];
-        $crit_name = $crit['name'];
-        $crit_weight = isset($crit['weight']) ? $crit['weight'] : 1;
-
-        // Получаем связанные ПВК
-        $pvk_sql = "SELECT pvk_id FROM criteria_pvk WHERE criteria_id = $crit_id";
-        $pvk_result = $conn->query($pvk_sql);
-        $pvk_ids = [];
-        while ($row = $pvk_result->fetch_assoc()) {
-            $pvk_ids[] = $row['pvk_id'];
-        }
-
-        // Получаем связанные тесты и параметры
-        $test_sql = "SELECT * FROM test_criteria WHERE criteria_name = '" . $conn->real_escape_string($crit_name) . "'";
-        $test_result = $conn->query($test_sql);
+        $crit_name = $crit['criteria_name'];
+        $crit_weight = isset($crit['weight']) ? floatval($crit['weight']) : 1.0;
+        // Получаем связанные тесты по названию критерия
+        $test_sql = "SELECT t.id as test_id, t.test_name as test_name, tc.weight, tc.direction, tc.cutoff 
+                     FROM tests t 
+                     JOIN test_criteria tc ON t.id = tc.test_id 
+                     WHERE tc.criteria_name = ?";
+        $stmt = $conn->prepare($test_sql);
+        $stmt->bind_param('s', $crit_name);
+        $stmt->execute();
+        $test_result = $stmt->get_result();
         $tests = [];
         while ($row = $test_result->fetch_assoc()) {
             $tests[] = $row;
         }
-
-        // Получаем результаты пользователя по этим тестам
+        $stmt->close();
+        // Получаем только последние результаты пользователя по этим тестам
         $test_ids = array_column($tests, 'test_id');
         if (empty($test_ids)) continue;
         $test_ids_str = implode(',', $test_ids);
-        $results_sql = "SELECT test_id, result FROM test_results WHERE user_id = $user_id AND test_id IN ($test_ids_str)";
+        $results_sql = "SELECT tr.test_id, tr.result FROM test_results tr INNER JOIN (
+            SELECT test_id, MAX(id) as max_id FROM test_results WHERE user_id = $user_id AND test_id IN ($test_ids_str) GROUP BY test_id
+        ) latest ON tr.test_id = latest.test_id AND tr.id = latest.max_id";
         $results_result = $conn->query($results_sql);
         $user_results = [];
         while ($row = $results_result->fetch_assoc()) {
             $user_results[$row['test_id']] = $row['result'];
         }
-
-        $crit_score = 0;
-        $crit_weight_sum = 0;
-        $cutoff_failed = false;
-
+        // Считаем средний балл по тестам критерия
+        $test_scores = [];
         foreach ($tests as $test) {
             $test_id = $test['test_id'];
-            $weight = isset($test['weight']) ? floatval($test['weight']) : 1;
             $direction = isset($test['direction']) ? $test['direction'] : 'asc';
-            $cutoff = isset($test['cutoff']) ? $test['cutoff'] : null;
             if (!isset($user_results[$test_id])) continue;
             $value = floatval($user_results[$test_id]);
             $score = ($direction === 'desc') ? (100 - $value) : $value;
-            // Проверка порога (cutoff)
-            if ($cutoff !== null) {
-                if ($direction === 'desc' && $value > $cutoff) $cutoff_failed = true;
-                if ($direction === 'asc' && $value < $cutoff) $cutoff_failed = true;
-            }
-            $crit_score += $score * $weight;
-            $crit_weight_sum += $weight;
+            $test_scores[] = $score;
         }
-        if ($crit_weight_sum > 0) {
-            $crit_score = $crit_score / $crit_weight_sum;
+        if (count($test_scores) > 0) {
+            $crit_score = array_sum($test_scores) / count($test_scores);
         } else {
             $crit_score = 0;
         }
-        if ($cutoff_failed) $crit_score = 0;
-        // Для вывода — берём название ПВК (если есть связь)
-        $pvk_name = '';
-        if (!empty($pvk_ids)) {
-            $pvk_id = $pvk_ids[0];
-            $pvk_name_sql = "SELECT name FROM pvk WHERE id = $pvk_id";
-            $pvk_name_result = $conn->query($pvk_name_sql);
-            if ($pvk_name_result->num_rows > 0) {
-                $pvk_name = $pvk_name_result->fetch_assoc()['name'];
-            } else {
-                $pvk_name = $crit_name;
-            }
-        } else {
-            $pvk_name = $crit_name;
-        }
+        $weighted_score = $crit_score * $crit_weight;
         $rating_color_class = $crit_score < 40 ? 'low' : ($crit_score < 70 ? 'medium' : 'high');
         $pvk_data[] = [
-            "name" => $pvk_name,
-            "pvk_id" => $pvk_ids[0] ?? null,
-            "average_rating" => round($crit_score, 2),
+            "name" => $crit_name,
+            "average_rating" => round($weighted_score, 2),
             "rating_color_class" => $rating_color_class
         ];
         $total_score += $crit_score * $crit_weight;
@@ -603,7 +568,7 @@ $age_categories = get_age_categories($ages);
         <h2>Анализ пригодности недоступен для вашей роли.</h2>
     <?php endif; ?>
 
-<div class="card info-dark" style="margin:2rem 0; padding:2rem; border-radius:18px;">
+<div class="info-section" style="margin:2rem 0; padding:2rem; border-radius:18px;">
   <h2>Как вычисляются рейтинги и баллы</h2>
   <ul>
     <li><b>Рейтинг по каждому ПВК</b> — это средневзвешенное значение ваших результатов по тестам, которые связаны с этим ПВК для выбранной профессии. Если тестов несколько, их результаты усредняются с учётом веса.</li>

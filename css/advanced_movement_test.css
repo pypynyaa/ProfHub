@@ -552,6 +552,16 @@ color: #fefefe;
 	animation: pulse3 1s ease-in-out infinite;
 }
 
+.key-label {
+    text-align: center;
+    margin: 2px 0;
+    font-size: 1.2em;
+    font-family: "Lato", sans-serif;
+    font-weight: 100;
+    color: #fefefe;
+    text-transform: uppercase;
+}
+
 @keyframes pulse3{
 	0% {   box-shadow: 0 0 0 1pt #2e87cc; }
 	50% {  box-shadow: 0 0 0 2.5pt #2e87cc;}

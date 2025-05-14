@@ -22,6 +22,15 @@ require '../widgets/pulse-widget/pulse-widget-include.php';
         .timer {
             margin-top: 50px; /* Добавлен отступ сверху */
         }
+        .key-label {
+            text-align: center;
+            margin: 10px 0;
+            font-size: 1.5em;
+            font-family: "Lato", sans-serif;
+            font-weight: 100;
+            color: #fefefe;
+            text-transform: uppercase;
+}
     </style>
 </head>
 
@@ -38,6 +47,7 @@ require '../widgets/pulse-widget/pulse-widget-include.php';
         <div id="circle" class="circle">
             <div class="point"></div>
         </div>
+		<div class ="key-label">PRESS W</div>
         <div id="user-result1" class="result">Result: <span id="result"></span></div>
     </div>
     <div id="end" class="hidden">game over</div>

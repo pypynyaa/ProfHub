@@ -27,33 +27,36 @@ require '../widgets/pulse-widget/pulse-widget-include.php';
 	</div>
 	<div id="container1">
 		<div id="circle2">
-		    <div class="point"></div>
+		    <div id="pointer"></div>
 		</div>
 		<p></p>
 		<div id="circle">
-		    <div id="pointer"></div>
+		    <div class="point"></div>
 		</div>
+		<div class ="key-label">PRESS W</div>
         <div id="user-result1">Result: <span id="result"></span></div>
 
 	</div>
     <div id="container2">
 		<div id="circle4">
-		    <div class="point2"></div>
+		    <div id="pointer2"></div>
 		</div>
 		<p></p>
 		<div id="circle3">
-		    <div id="pointer2"></div>
+		    <div class="point2"></div>
 		</div>
+		<div class ="key-label">PRESS D</div>
         <div id="user-result2">Result: <span id="result2"></span></div>
 	</div>
     <div id="container3">
 		<div id="circle6">
-		    <div class="point3"></div>
+		    <div id="pointer3"></div>
 		</div>
 		<p></p>
 		<div id="circle5">
-		    <div id="pointer3"></div>
+		    <div class="point3"></div>
 		</div>
+		<div class ="key-label">PRESS A</div>
         <div id="user-result3">Result: <span id="result3"></span></div>
 	</div>
 	<div id="end" class="hidden">game over</div>
